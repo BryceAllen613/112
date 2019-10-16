@@ -1,0 +1,32 @@
+Script started on Mon 25 Sep 2017 07:51:07 PM EDT
+bda5@church:~/112/proj2$ ls
+array.cpp  arrayData.txt  array.h  ArrayTester.cpp  ArrayTester.h  Debug  main.cpp  typescript
+bda5@church:~/112/proj2$ cd d Debug
+bda5@church:~/112/proj2/Debug$ ls
+array.d  ArrayTester.d	main.d	makefile    proj2	subdir.mk
+array.o  ArrayTester.o	main.o	objects.mk  sources.mk
+bda5@church:~/112/proj2/Debug$ make all
+make: Nothing to be done for 'all'.
+bda5@church:~/112/proj2/Debug$ cd ..
+bda5@church:~/112/proj2$ ./Debug/proj            ls
+array.cpp  arrayData.txt  array.h  ArrayTester.cpp  ArrayTester.h  Debug  main.cpp  typescript
+bda5@church:~/112/proj2$ ./Debug/proj2
+Testing initialize()... Passed!
+Testing print()... 
+Expecting 3 values: 1, 2, 3...
+1	2	3	
+Expecting 4 values: 2, 3, 4, 5...
+2	3	4	5	
+Expecting 5 values: 3, 4, 5, 6, 7...
+3	4	5	6	7	
+Passed!
+Testing average()... Passed!
+Testing sum()... Passed!
+Testing resize()... Passed!  But double-check that you deleted the old array...
+Testing concat()... Passed!  But double-check that you deleted the old array...
+Testing fill()... Passed!  But double-check that you deleted the old array...
+Testing read()... Passed!
+All tests passed!
+bda5@church:~/112/proj2$ exit
+
+Script done on Mon 25 Sep 2017 07:53:31 PM EDT

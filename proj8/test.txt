@@ -1,0 +1,7 @@
+racecar
+RaceCar
+madam i'm adam.
+madam, I'm Adam.
+Race Car.
+Not a palindrome.
+

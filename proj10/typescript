@@ -1,0 +1,248 @@
+Script started on Mon 04 Dec 2017 08:41:56 PM EST
+bda5@kay:~/112/proj10$ ls
+ImageConverter.cpp  main      Makefile			      typescript
+ImageConverter.h    main.cpp  pics
+ImageConverter.o    main.o    project 10 data and charts.ods
+bda5@kay:~/112/proj10$ cat ImageConverter.cpp
+/*
+ * ImageConverter.cpp declares a class for
+ *  various image conversion operations.
+ *
+ *  Author:  Joel Adams, CS112 @ Calvin College.
+ *  Created: March 2015
+ *  Revised: November 2016
+ *  Revised By: Bryce Allen
+ */
+
+#include "ImageConverter.h"
+#include <unistd.h>            // sleep()
+
+//-----------------  Method definitions ------------------------------
+
+/* explicit constructor
+ *
+ * @param imageFileName, a string.
+ * @param width, an int.
+ * @param height, an int.
+ *
+ * Precondition: imageFileName contains the name of a valid image file
+ *               && width > 0 && height > 0
+ * Postcondition: myImageFileName == imageFileName
+ *                && myWidth == width && myHeight = height
+ *                && width x height Canvas containing the image
+ *                    from imageFileName has been displayed on screen.
+ */
+ImageConverter::ImageConverter(const std::string& imageFileName, int width, int height)
+ : myCanvas1(0, 0, width, height, imageFileName),
+   myImageFileName(imageFileName),
+   myWidth(width),
+   myHeight(height)
+{
+	//myHeight = height;
+    myCanvas1.start();
+    myCanvas1.drawImage(myImageFileName, 0, 0, width, height);
+    sleep(1);
+
+}
+
+/* destructor
+ *
+ * Precondition: this ImageConverter object is going out of scope.
+ * Postcondition: myCanvas1 has disappeared from the screen.
+ */
+ImageConverter::~ImageConverter() {
+    myCanvas1.wait();
+    cout << "\nImageConverter terminated normally." << endl;
+}
+
+/* written by Bryce Allen
+ * displays the same image but in black and white
+ */
+void ImageConverter::toBlackAndWhite(){
+	double startTime = omp_get_wtime();
+
+	Canvas canvas2(myWidth+50, 0, myWidth, myHeight, myImageFileName+" black and white");
+	canvas2.start();
+
+	#pragma omp parallel
+	{
+		unsigned num_threads = omp_get_num_threads();
+		unsigned id = omp_get_thread_num();
+
+		for( int row = id; row < myHeight; row += num_threads ){
+			canvas2.sleep();
+			for( int col = 0; col < myWidth; col++ ){
+				ColorInt pixelColor = myCanvas1.getPixel(row, col);
+
+				int r = pixelColor.R;
+				int g = pixelColor.G;
+				int b = pixelColor.B;
+
+				int GRAY = 0;
+				if( r > g )
+				{
+					if( r > b )GRAY = r;
+					else GRAY = b;
+				}else{
+					if ( g > b )GRAY = g;
+					else GRAY = b;
+				}
+				canvas2.drawPixel(row, col, ColorInt(GRAY,GRAY,GRAY));
+			}
+		}
+	}
+	double endTime = omp_get_wtime();
+	canvas2.takeScreenShot();
+	canvas2.wait();
+
+	double totalTime = (endTime - startTime);
+	cout << "Total time to execute toBlackAndWhite() is: " << totalTime << endl;
+}
+
+/* written by Bryce Allen
+ * displays the same image but mirrored horizontally
+ */
+void ImageConverter::mirrorHorizontal(){
+	double startTime = omp_get_wtime();
+
+	Canvas canvas3(myWidth+50, 0, myWidth, myHeight, myImageFileName+" black and white");
+	canvas3.start();
+
+	#pragma omp parallel
+	{
+		unsigned num_threads = omp_get_num_threads();
+		unsigned id = omp_get_thread_num();
+
+		int c = myWidth;
+		for( int row = id; row < myHeight; row += num_threads )
+		{
+			c = myWidth;
+			canvas3.sleep();
+			for( int col = 0; col < myWidth; col++ )
+			{
+				ColorInt pixelColor = myCanvas1.getPixel(row,col);
+
+				int red = pixelColor.R;
+				int green = pixelColor.G;
+				int blue = pixelColor.B;
+
+				canvas3.drawPixel(row, c, ColorInt(red,green,blue));
+				c--;
+			}
+		}
+	}
+	double endTime = omp_get_wtime();
+	canvas3.takeScreenShot();
+	canvas3.wait();
+
+	double totalTime = (endTime - startTime);
+	cout << "Total time to execute mirrorHorizontal() is: " << totalTime << endl;
+}
+
+bda5@kay:~/112/proj10$ ImageConverter.h
+bash: ImageConverter.h: command not found
+bda5@kay:~/112/proj10$ cat ImageConsve   verter.h
+/*
+ * ImageConverter.cpp declares a class for
+ *  various image conversion operations.
+ *
+ *  Author:  Joel Adams, CS112 @ Calvin College.
+ *  Created: March 2015
+ *  Revised: November 2016
+ *  Revised By: Bryce Allen
+ */
+
+#ifndef IMAGECONVERTER_H_
+#define IMAGECONVERTER_H_
+
+#include <tsgl.h>     // Canvas, ColorInt, etc.
+#include <iostream>   // cout, cerr, ...
+#include <string>     // string
+#include <omp.h>      // OpenMP functions
+
+using namespace tsgl;
+using namespace std;
+
+class ImageConverter {
+public:
+	ImageConverter(const std::string& imageFileName, int width, int height);
+	void toBlackAndWhite();
+	void mirrorHorizontal();
+	~ImageConverter();
+
+private:
+    Canvas      myCanvas1;
+    string      myImageFileName;
+    int         myWidth;
+    int         myHeight;
+};
+
+
+#endif /* IMAGECONVERTER_H_ */
+bda5@kay:~/112/proj10$ cat main.cpp
+/*
+ * main.cpp is a driver for an ImageConverter program
+ *  using OpenMP to parallelize the image processing
+ *  and TSGL to view the processing in near real time.
+ *
+ * Author: Joel Adams, for CS 112 at Calvin College.
+ * Date: March 2015.
+ * Revised: November 2016.
+ */
+
+#include "ImageConverter.h"
+
+int main() {
+	for( int i = 2; i <= 16; i+=2 ){
+		omp_set_num_threads(i);
+	    ImageConverter iConverter("pics/beads.jpg", 800, 800);
+	    cout << "number of threads: " << i << endl;
+	    iConverter.toBlackAndWhite();
+	    iConverter.mirrorHorizontal();
+	}
+
+}
+bda5@kay:~/112/proj10$ cd    cd  .// main
+number of threads: 2
+Total time to execute toBlackAndWhite() is: 6.68623
+Total time to execute mirrorHorizontal() is: 6.66758
+
+ImageConverter terminated normally.
+number of threads: 4
+Total time to execute toBlackAndWhite() is: 3.3517
+Total time to execute mirrorHorizontal() is: 3.33478
+
+ImageConverter terminated normally.
+number of threads: 6
+Total time to execute toBlackAndWhite() is: 2.23436
+Total time to execute mirrorHorizontal() is: 2.23441
+
+ImageConverter terminated normally.
+number of threads: 8
+Total time to execute toBlackAndWhite() is: 1.67001
+Total time to execute mirrorHorizontal() is: 1.67011
+
+ImageConverter terminated normally.
+number of threads: 10
+Total time to execute toBlackAndWhite() is: 1.33557
+Total time to execute mirrorHorizontal() is: 1.33562
+
+ImageConverter terminated normally.
+number of threads: 12
+Total time to execute toBlackAndWhite() is: 1.11858
+Total time to execute mirrorHorizontal() is: 1.11867
+
+ImageConverter terminated normally.
+number of threads: 14
+Total time to execute toBlackAndWhite() is: 0.967737
+Total time to execute mirrorHorizontal() is: 0.967679
+
+ImageConverter terminated normally.
+number of threads: 16
+Total time to execute toBlackAndWhite() is: 0.8365
+Total time to execute mirrorHorizontal() is: 0.83652
+
+ImageConverter terminated normally.
+bda5@kay:~/112/proj10$ exit
+
+Script done on Mon 04 Dec 2017 08:44:43 PM EST
